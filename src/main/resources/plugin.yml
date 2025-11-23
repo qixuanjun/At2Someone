@@ -1,0 +1,18 @@
+name: at2someone
+version: '1.0.0-SNAPSHOT'
+main: top.qixuanjun233.at2someone.At2someone
+api-version: '1.18'
+authors: [ qixuanjun233 ]
+description: 非常fashion的一个@人的tool
+website: www.qixuanjun233.top
+commands:
+  at:
+    description: Use this to get information about this plugin
+    usage: Type "/at" to get more information
+permissions:
+  at.dnd:
+    description: 开关勿扰模式权限
+    default: true
+  at.admin:
+    description: 管理员权限
+    default: op
