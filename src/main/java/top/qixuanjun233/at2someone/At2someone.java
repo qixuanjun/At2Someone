@@ -20,7 +20,6 @@ public final class At2someone extends JavaPlugin {
     @Override
     public void onEnable() {
         // Plugin startup logic
-        getLogger().info("Starting up At2someone...");
         getLogger().info("Loading configs...");
         config = getConfig();
         dndPlayers = new CopyOnWriteArraySet<>();
@@ -40,12 +39,11 @@ public final class At2someone extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
-        getLogger().info("At2someone is Enabled Successfully!");
+        getLogger().info("At2someone Enabled Successfully.");
         if(!pluginEnabled) {
             getLogger().warning("Plugin is Disabled,");
-            getLogger().warning("If you want to trigger this function, you can enable the plugin by using /at enable.");
+            getLogger().warning("If you want to trigger this plugin, enable it by using /at enable.");
         }
-        getLogger().info("@MainTread ❤");
     }
 
     @Override
@@ -57,8 +55,7 @@ public final class At2someone extends JavaPlugin {
         savePluginStatus();
         getLogger().info("Plugin Configs Saved.");
         getServer().getPluginManager().disablePlugins();
-        getLogger().info("At2someone Disabled.");
-        getLogger().info("❤ daerTniaM@");
+        getLogger().info("At2someone Disabled Successfully.");
     }
     //其实我在想要不要给我这一大坨石山去写注释...
 
@@ -88,7 +85,7 @@ public final class At2someone extends JavaPlugin {
         this.pluginEnabled = enable;
         savePluginStatus();
         getLogger().info("The PluginStatus had been switched to " + (enable ? "§aEnable Mode" : "§cDisable Mode") + "§r manually.");
-    }
+    }//had been switched表现完被动（？）我语法不好不要骂我（（（（（（（
 
     //加载 勿扰模式的玩家
     private void loadDndPlayers() {
@@ -97,7 +94,7 @@ public final class At2someone extends JavaPlugin {
             try {
                 dndPlayers.add(UUID.fromString(uuidStr));
             } catch (IllegalArgumentException e) {
-                getLogger().warning("Invalid UUID format：" + uuidStr + "（Ignored）");
+                getLogger().warning("Invalid UUID format: " + uuidStr + "（Ignored）");
             }
         });
     }
@@ -149,18 +146,14 @@ public final class At2someone extends JavaPlugin {
 
     //切换 是否需输入@才能提到人
     public void togglePrefix(boolean bool) {
-        if (bool) {
-            isPrefix = true;
-        } else {
-            isPrefix = false;
-        }
+        isPrefix = bool;
         savePrefix();
     }
 
     //提示玩家你被@了
     public void remindPlayer(String senderRealName,String senderDisplayName,Player receiver,boolean bool) {
         //声明一个str C#大手发力了 为什么java的string不是string而是String啊 我不想写大写字母啊
-        String mplayersubtitle = null;
+        String mplayersubtitle;
         //在这里我先处理一下@完之后的玩家名变成黄色的事情。
         if(senderRealName.equals(senderDisplayName)){
             if(bool){

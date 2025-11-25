@@ -11,7 +11,7 @@
 # 兼容性
 目前仅支持MC1.18以上的插件端 如spigot paper等支持bukkit api的服务端
 
-经测试插件可运行于spigot1.18 mohist1.18.2 leaves1.20.6
+经测试插件可运行于spigot1.18 mohist1.18.2 leaves1.20.6(别的应该也可以)
 
 目前仅支持中文
 
@@ -49,4 +49,5 @@
 ###### 图3
 ![](https://s21.ax1x.com/2025/11/24/pZk585n.png)
 # 开源协议
-### MIT 必须MIT
+### MIT License
+###### 必须MIT!
