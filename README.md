@@ -1,5 +1,5 @@
-# at2someone
-> 灵感来源于某服务器五周目（2021）时的一个 ***（我很喜欢但是断更了的）*** Sponge 插件 遂写之。
+# At2Someone
+> 灵感来源于某服务器五周目（2021）时的一个 ***（我很喜欢但是断更了的）*** Bukkit 插件 遂写之。
 > 
 > 权当 Java 练手 欢迎大佬批评。
 
@@ -11,7 +11,7 @@
 
 目前仅支持 Minecraft 1.18+ 的插件端 如 Spigot、Paper 等兼容 Bukkit API 的服务端。
 
-经测试插件可运行于 Spigot 1.18、Mohist 1.18.2、Leaves 1.20.6 ~~理论上别的应该也可以~~，目前仅支持中文。
+经测试插件可运行于 Spigot 1.18、Mohist 1.18.2,1.20.1、Leaves 1.20.6 ~~理论上别的应该也可以~~，目前仅支持中文。
 
 ## 指令
 ![](https://s21.ax1x.com/2025/11/24/pZk53Us.png)
@@ -36,12 +36,13 @@
 #### isPrefix
 ![](https://s21.ax1x.com/2025/11/24/pZk5JCq.png)
 
-当 OP 输入 `/at dnd on` 时，玩家必须要输入@+用户名才可提及某人。
+当 OP 输入 `/at isprefix on` 时，玩家必须要输入@+用户名才可提及某人。
 
-当 OP 输入  `/at dnd off` 时，玩家仅需输入用户名即可提及某人。
+当 OP 输入  `/at isprefix off` 时，玩家仅需输入用户名即可提及某人。
 
 ## 效果图
 ![](https://s21.ax1x.com/2025/11/24/pZk53Us.png)
 
 ## 协议
 MIT License
+###### 必须MIT！
