@@ -1,5 +1,5 @@
 name: at2someone
-version: '1.0.1-SNAPSHOT'
+version: '1.0.2-SNAPSHOT'
 main: top.qixuanjun233.at2someone.At2someone
 api-version: '1.18'
 authors: [ qixuanjun233 ]
@@ -10,8 +10,11 @@ commands:
     description: Use this to get information about this plugin
     usage: Type "/at" to get more information
 permissions:
+  at.mention:
+    description: 提及他人权限
+    default: true
   at.dnd:
-    description: 默认权限
+    description: 勿扰模式权限
     default: true
   at.admin:
     description: 管理员权限

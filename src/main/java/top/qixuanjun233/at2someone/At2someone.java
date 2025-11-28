@@ -39,7 +39,7 @@ public final class At2someone extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
-        getLogger().info("At2someone Enabled Successfully.");
+        getLogger().info("At2someone(Ver.1.0.2-SNAPSHOT) Enabled Successfully.");
         if(!pluginEnabled) {
             getLogger().warning("Plugin is Disabled,");
             getLogger().warning("If you want to trigger this plugin, enable it by using /at enable.");
@@ -85,7 +85,7 @@ public final class At2someone extends JavaPlugin {
         this.pluginEnabled = enable;
         savePluginStatus();
         getLogger().info("The PluginStatus had been switched to " + (enable ? "§aEnable Mode" : "§cDisable Mode") + "§r manually.");
-    }//had been switched表现完被动（？）我语法不好不要骂我（（（（（（（
+    }//have been switched表现完被动（？）我语法不好不要骂我（（（（（（（
 
     //加载 勿扰模式的玩家
     private void loadDndPlayers() {
