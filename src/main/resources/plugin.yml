@@ -1,5 +1,5 @@
 name: at2someone
-version: '1.0.2-SNAPSHOT'
+version: '1.0.3-SNAPSHOT'
 main: top.qixuanjun233.at2someone.At2someone
 api-version: '1.18'
 authors: [ qixuanjun233 ]
@@ -16,6 +16,9 @@ permissions:
   at.dnd:
     description: 勿扰模式权限
     default: true
+  at.atall:
+    description: 提及全体权限
+    default: op
   at.admin:
     description: 管理员权限
     default: op

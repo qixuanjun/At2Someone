@@ -14,6 +14,7 @@ public final class At2someone extends JavaPlugin {
 
     private boolean pluginEnabled;
     private boolean isPrefix;
+    private boolean isAtAll;
     private FileConfiguration config;
     private Set<UUID> dndPlayers;
 
@@ -24,8 +25,10 @@ public final class At2someone extends JavaPlugin {
         config = getConfig();
         dndPlayers = new CopyOnWriteArraySet<>();
         isPrefix = getConfig().getBoolean("prefix");
+        isAtAll = getConfig().getBoolean("isAtAll");
         loadPluginStatus();
         loadPrefix();
+        loadAtAll();
         getLogger().info("Plugin Configs Loaded.");
         loadDndPlayers();
         getLogger().info("DndPlayers Loaded.");
@@ -39,7 +42,7 @@ public final class At2someone extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
-        getLogger().info("At2someone(Ver.1.0.2-SNAPSHOT) Enabled Successfully.");
+        getLogger().info("At2someone(Ver.1.0.3-SNAPSHOT) Enabled Successfully.");
         if(!pluginEnabled) {
             getLogger().warning("Plugin is Disabled,");
             getLogger().warning("If you want to trigger this plugin, enable it by using /at enable.");
@@ -51,6 +54,7 @@ public final class At2someone extends JavaPlugin {
         // Plugin shutdown logic
         saveDndPlayers();
         getLogger().info("DndPlayers Saved.");
+        saveAtAll();
         savePrefix();
         savePluginStatus();
         getLogger().info("Plugin Configs Saved.");
@@ -66,6 +70,7 @@ public final class At2someone extends JavaPlugin {
         loadPluginStatus();
         loadDndPlayers();
         loadPrefix();
+        loadAtAll();
         getLogger().info("Plugin Configs Reloaded.");
     }
 
@@ -101,21 +106,45 @@ public final class At2someone extends JavaPlugin {
 
     //加载 是否需输入@才能提到人 的config
     private void loadPrefix() {
-        config.getBoolean("prefix", isPrefix);
+        isPrefix = config.getBoolean("isPrefix", false);
+    }
+    //加载 是否起用@所有人
+    private void loadAtAll() {
+        isAtAll = config.getBoolean("isAtAll", true);
     }
 
     //一个判断插件是否启用的布尔 方便后面用
     public boolean isPluginEnabled() {
         return pluginEnabled;
     }
-
+    //判断isPrefix是否启用
     public boolean isPrefix(){
         return isPrefix;
+    }
+    //判断AtAll是否启用
+    public boolean isAtAll(){
+        return isAtAll;
     }
 
     //help栏里负责显示插件状态的 我在这里写纯粹是为了别的地方看起来好看😋
     public String isPluginEnabledText() {
         if(pluginEnabled) {
+            return "§a已启用";
+        }else{
+            return "§c已禁用";
+        }
+    }
+    //同上
+    public String isPrefixText() {
+        if(isPrefix) {
+            return "§a已启用";
+        }else{
+            return "§c已禁用";
+        }
+    }
+    //同上
+    public String isAtAllText() {
+        if(isAtAll) {
             return "§a已启用";
         }else{
             return "§c已禁用";
@@ -131,6 +160,12 @@ public final class At2someone extends JavaPlugin {
     //保存 是否需输入@才能提到人 到config里
     private void savePrefix() {
         config.set("isPrefix", isPrefix);
+        saveConfig();
+    }
+
+    //保存 是否允许@all/全体成员
+    private void saveAtAll() {
+        config.set("isAtAll", isAtAll);
         saveConfig();
     }
 
@@ -150,23 +185,33 @@ public final class At2someone extends JavaPlugin {
         savePrefix();
     }
 
+    //切换 AtAll使能
+    public void toggleAtAll(boolean bool) {
+        isAtAll = bool;
+        saveAtAll();
+    }
+
     //提示玩家你被@了
-    public void remindPlayer(String senderRealName,String senderDisplayName,Player receiver,boolean bool) {
+    public void remindPlayer(String senderRealName,String senderDisplayName,Player receiver,int mode) {
         //声明一个str C#大手发力了 为什么java的string不是string而是String啊 我不想写大写字母啊
+        //这里说一下mode的意思: 0:isprefix启用的时候进行显示 / 1:isprefix关闭的时候显示 / 2:at全体的时候显示
         String mplayersubtitle;
-        //在这里我先处理一下@完之后的玩家名变成黄色的事情。
         if(senderRealName.equals(senderDisplayName)){
-            if(bool){
-                mplayersubtitle = "§e" + senderRealName + "§e@了你!";
-            }else{
-                mplayersubtitle = "§e" + senderRealName + "§e提到了你!";
-            }
+            mplayersubtitle = switch (mode) {
+                case 0 -> "§e" + senderRealName + "§e@了你!";
+                case 1 -> "§e" + senderRealName + "§e提到了你!";
+                case 2 -> "§e" + senderRealName + "§e@了全体成员!";
+                default ->
+                        throw new IllegalStateException("Unexpected value in function remindPlayer(xxx,xxx,xxx,mode): mode:" + mode);
+            };
         }else{
-            if(bool){
-                mplayersubtitle = "§e" + senderRealName + "§e(" + senderDisplayName + "§e)" + "@了你!";
-            }else{
-                mplayersubtitle = "§e" + senderRealName + "§e(" + senderDisplayName + "§e)" + "提到了你!";
-            }
+            mplayersubtitle = switch (mode) {
+                case 0 -> "§e" + senderRealName + "§e(" + senderDisplayName + "§e)" + "§e@了你!";
+                case 1 -> "§e" + senderRealName + "§e(" + senderDisplayName + "§e)" + "§e提到了你!";
+                case 2 -> "§e" + senderRealName + "§e(" + senderDisplayName + "§e)" + "§e@了全体成员!";
+                default ->
+                        throw new IllegalStateException("Unexpected value in function remindPlayer(xxx,xxx,xxx,mode): mode:" + mode);
+            };
         }
         //这里进行一个"dndplayer"的判断 然后选择性的提供title和sound
         if(!dndPlayers.contains(receiver.getUniqueId())) {

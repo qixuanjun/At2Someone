@@ -85,6 +85,40 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
                         }
                         return true;
                 }
+            case "atall":
+                if (args.length < 2) {
+                    if (sender.hasPermission("at.admin")) {
+                        sender.sendMessage("§8[§6At2Someone§8] §c§l❌ §r§c用法错误! 正确用法：/at atall on/off");
+                    }else{
+                        sender.sendMessage("§8[§6At2Someone§8] §c§l❌ §r§c您没有权限使用此命令");
+                    }
+                    return true;
+                }
+                switch (args[1].toLowerCase()) {
+                    case "on":
+                        if (sender.hasPermission("at.admin")) {
+                            plugin.toggleAtAll(true);
+                            sender.sendMessage("§8[§6At2Someone§8] §a§l✔ §r§e功能已开启，现在可以@全体成员了");
+                        }else{
+                            sender.sendMessage("§8[§6At2Someone§8] §c§l❌ §r§c您没有权限使用此命令");
+                        }
+                        return true;
+                    case "off":
+                        if (sender.hasPermission("at.admin")) {
+                            plugin.toggleAtAll(false);
+                            sender.sendMessage("§8[§6At2Someone§8] §a§l✔ §r§e功能已关闭，现在无法@全体成员");
+                        }else{
+                            sender.sendMessage("§8[§6At2Someone§8] §c§l❌ §r§c您没有权限使用此命令");
+                        }
+                        return true;
+                    default:
+                        if (sender.hasPermission("at.admin")) {
+                            sender.sendMessage("§8[§6At2Someone§8] §c§l❌ §r§c无效参数! 请使用 on 或 off");
+                        }else{
+                            sender.sendMessage("§8[§6At2Someone§8] §c§l❌ §r§c您没有权限使用此命令");
+                        }
+                        return true;
+                }
             case "enable":
                 if (sender.hasPermission("at.admin")) {
                     if (plugin.isPluginEnabled()) {
@@ -125,19 +159,23 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
 
     private void HelpSomeone(CommandSender sender) {
         if (sender.hasPermission("at.admin")) {
-            sender.sendMessage("§7===== §aAt2Someone §cV1.0.2 §e命令帮助§a(管理员) §7=====");
+            sender.sendMessage("§7===== §aAt2Someone §cV1.0.3 §e命令帮助§a(管理员) §7=====");
             sender.sendMessage(ChatColor.WHITE + "/at dnd on " + ChatColor.GRAY + "- 开启勿扰模式");
             sender.sendMessage(ChatColor.WHITE + "/at dnd off " + ChatColor.GRAY + "- 关闭勿扰模式");
             sender.sendMessage(ChatColor.WHITE + "/at isprefix on/off" + ChatColor.GRAY + "- 启用/关闭需要输入@才可提及人（管理员）");
+            sender.sendMessage(ChatColor.WHITE + "/at atall on/off" + ChatColor.GRAY + "- 启用/关闭@全体成员功能（管理员）");
             sender.sendMessage(ChatColor.WHITE + "/at enable " + ChatColor.GRAY + "- 启用插件（管理员）");
             sender.sendMessage(ChatColor.WHITE + "/at disable " + ChatColor.GRAY + "- 禁用插件（管理员）");
             sender.sendMessage(ChatColor.WHITE + "/at reload " + ChatColor.GRAY + "- 重载插件（管理员）");
+            sender.sendMessage(ChatColor.GRAY + "==================================");
+            sender.sendMessage(ChatColor.YELLOW + "isprefix状态:" + plugin.isPrefixText());
+            sender.sendMessage(ChatColor.YELLOW + "atall状态:" + plugin.isAtAllText());
         }else{
-            sender.sendMessage("§7===== §aAt2Someone §cV1.0.2 §e命令帮助 §7=====");
+            sender.sendMessage("§7===== §aAt2Someone §cV1.0.3 §e命令帮助 §7=====");
             sender.sendMessage(ChatColor.WHITE + "/at dnd on " + ChatColor.GRAY + "- 开启勿扰模式");
             sender.sendMessage(ChatColor.WHITE + "/at dnd off " + ChatColor.GRAY + "- 关闭勿扰模式");
+            sender.sendMessage(ChatColor.GRAY + "==================================");
         }
-        sender.sendMessage(ChatColor.GRAY + "==================================");
         sender.sendMessage(ChatColor.YELLOW + "插件当前状态:" + plugin.isPluginEnabledText());
         sender.sendMessage(ChatColor.GRAY+ "==================================");
     }
@@ -149,6 +187,7 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
             list.add("dnd");
             if (sender.hasPermission("at.admin")) {
                 list.add("isprefix");
+                list.add("atall");
                 list.add("enable");
                 list.add("disable");
                 list.add("reload");
@@ -169,6 +208,13 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
                         list2.add("on");
                         list2.add("off");
                         return list2;
+                    }
+                case "atall":
+                    if (sender.hasPermission("at.admin")) {
+                        List<String> list3 = new ArrayList<>();
+                        list3.add("on");
+                        list3.add("off");
+                        return list3;
                     }
                 default:
                     return null;
