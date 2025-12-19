@@ -5,6 +5,8 @@
 
 一个可以在 bukkit 服务器内 @人的插件。在聊天栏中 `@ + 用户名` 或直接 `输入用户名` 即可在公屏中提及某人。且附带勿扰模式和显示昵称等原先没有的功能。
 
+PS:当isprefix关闭的时候 玩家可以在句内提及人 如 `你好qixuanjun233`
+
 ## 兼容性
 1. Bukkit 服务端
 2. 游戏版本 ≥ 1.18
@@ -23,7 +25,7 @@
 
 ###### Tips:您可通过禁用某玩家或Group的`at.mention`权限实现 启用/禁用 此玩家/群组@人的权限，`at.atall`同理。
 ## 指令
-![](https://s41.ax1x.com/2025/11/28/pZEgdhV.png)
+![](https://s41.ax1x.com/2025/12/20/pZ3PwfP.png)
 
 | 指令                  | 权限              | 用途                   |
 |---------------------|-----------------|----------------------|
@@ -37,28 +39,29 @@
 
 ## 功能
 #### 勿扰模式
-![](https://s21.ax1x.com/2025/11/24/pZk585n.png)
+![](https://s41.ax1x.com/2025/12/20/pZ3P6mQ.png)
 
 当玩家输入 `/at dnd on` 时，玩家将**不会收到当其他玩家提及时所发出的提示音与标题**，仅会在聊天栏中高亮用户名。
 
 此模式可通过 `/at dnd off` 进行关闭
 
 #### isPrefix
-![](https://s21.ax1x.com/2025/11/24/pZk5JCq.png)
+![](https://s41.ax1x.com/2025/12/20/pZ3Pr6S.png)
 
 当 OP 输入 `/at isprefix on` 时，玩家必须输入@+用户名才可提及某人。
 
 当 OP 输入  `/at isprefix off` 时，玩家仅需输入用户名即可提及某人(如图左下角,默认为此)。
 
 ## at全体成员
+![](https://s41.ax1x.com/2025/12/20/pZ3PsOg.png)
 
 当 OP 输入 `/at atall on` 时，拥有`at.atall`权限的玩家可@全体成员。
 
 当 OP 输入 `/at atall off` 时，玩家不可以@全体成员。
 
 ## 效果图
-![](https://s41.ax1x.com/2025/11/28/pZEgWh6.png)
-![](https://s41.ax1x.com/2025/11/28/pZE2CHs.png)
+![](https://s41.ax1x.com/2025/12/20/pZ3Pcwj.png)
+![](https://s41.ax1x.com/2025/12/20/pZ3PDl8.png)
 
 ## 协议
 MIT License
