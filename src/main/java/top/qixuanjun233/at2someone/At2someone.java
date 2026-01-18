@@ -1,5 +1,7 @@
 package top.qixuanjun233.at2someone;
 
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -17,6 +19,8 @@ public final class At2someone extends JavaPlugin {
     private boolean isAtAll;
     private FileConfiguration config;
     private Set<UUID> dndPlayers;
+    // Store the last set of completions added so we can remove them before adding new ones
+    private java.util.Collection<String> lastCompletions = new java.util.ArrayList<>();
 
     @Override
     public void onEnable() {
@@ -33,6 +37,7 @@ public final class At2someone extends JavaPlugin {
         loadDndPlayers();
         getLogger().info("DndPlayers Loaded.");
         getServer().getPluginManager().registerEvents(new PlayerChatListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerJoinLeaveListener(this), this);
         getLogger().info("ChatListener Registered.");
         if (getCommand("at") != null) {
             Objects.requireNonNull(getCommand("at")).setExecutor(new CommandHandler(this));
@@ -126,6 +131,14 @@ public final class At2someone extends JavaPlugin {
         return isAtAll;
     }
 
+    public java.util.Collection<String> getLastCompletions() {
+        return lastCompletions;
+    }
+
+    public void setLastCompletions(java.util.Collection<String> completions) {
+        this.lastCompletions = completions;
+    }
+
     //help栏里负责显示插件状态的 我在这里写纯粹是为了别的地方看起来好看😋
     public String isPluginEnabledText() {
         if(pluginEnabled) {
@@ -193,30 +206,43 @@ public final class At2someone extends JavaPlugin {
 
     //提示玩家你被@了
     public void remindPlayer(String senderRealName,String senderDisplayName,Player receiver,int mode) {
-        //声明一个str C#大手发力了 为什么java的string不是string而是String啊 我不想写大写字母啊
-        //这里说一下mode的意思: 0:isprefix启用的时候进行显示 / 1:isprefix关闭的时候显示 / 2:at全体的时候显示
-        String mplayersubtitle;
-        if(senderRealName.equals(senderDisplayName)){
-            mplayersubtitle = switch (mode) {
-                case 0 -> "§e" + senderRealName + "§e@了你!";
-                case 1 -> "§e" + senderRealName + "§e提到了你!";
-                case 2 -> "§e" + senderRealName + "§e@了全体成员!";
-                default ->
-                        throw new IllegalStateException("Unexpected value in function remindPlayer(xxx,xxx,xxx,mode): mode:" + mode);
-            };
-        }else{
-            mplayersubtitle = switch (mode) {
-                case 0 -> "§e" + senderRealName + "§e(" + senderDisplayName + "§e)" + "§e@了你!";
-                case 1 -> "§e" + senderRealName + "§e(" + senderDisplayName + "§e)" + "§e提到了你!";
-                case 2 -> "§e" + senderRealName + "§e(" + senderDisplayName + "§e)" + "§e@了全体成员!";
-                default ->
-                        throw new IllegalStateException("Unexpected value in function remindPlayer(xxx,xxx,xxx,mode): mode:" + mode);
-            };
+        //这里说一下mode的意思: 0:带@提及 (@mention) / 1:不带@提及 (plain mention) / 2:at全体 (atAll)
+        //根据用户要求: 不带@+用户名的，不发出声音, 只显示白色ActionBar
+        
+        String actionbarMsg = "";
+        boolean playSound = false;
+
+        if (mode == 1) {
+             if (senderRealName.equals(senderDisplayName)) {
+                 actionbarMsg = "§f" + senderRealName + " 提到了你";
+             } else {
+                 actionbarMsg = "§f" + senderRealName + " (" + senderDisplayName + "§f) 提到了你";
+             }
+             playSound = false;
+        } else {
+             // mode 0 or 2 (Implicitly implies Highlighting + Sound)
+             if(senderRealName.equals(senderDisplayName)){
+                 actionbarMsg = switch (mode) {
+                     case 0 -> "§6§l" + senderRealName + " §e§l@了你!";
+                     case 2 -> "§6§l" + senderRealName + " §e§l@了全体成员!";
+                     default -> "";
+                 };
+             }else{
+                 actionbarMsg = switch (mode) {
+                     case 0 -> "§6§l" + senderRealName + "§r(" + senderDisplayName + "§r) §e§l@了你!";
+                     case 2 -> "§6§l" + senderRealName + "§r(" + senderDisplayName + "§r) §e§l@了全体成员!";
+                     default -> "";
+                 };
+             }
+             playSound = true;
         }
+
         //这里进行一个"dndplayer"的判断 然后选择性的提供title和sound
-        if(!dndPlayers.contains(receiver.getUniqueId())) {
-            receiver.sendTitle("§b有人在公屏提到了你❤", mplayersubtitle);
-            receiver.playSound(receiver.getLocation(), "entity.experience_orb.pickup", 1.0f, 1.0f);
+        if(!dndPlayers.contains(receiver.getUniqueId()) && !actionbarMsg.isEmpty()) {
+            receiver.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(actionbarMsg));
+            if (playSound) {
+                receiver.playSound(receiver.getLocation(), "entity.experience_orb.pickup", 1.0f, 1.0f);
+            }
         }
     }
 }

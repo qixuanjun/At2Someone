@@ -1,7 +1,7 @@
 name: at2someone
 version: '1.0.4-SNAPSHOT'
 main: top.qixuanjun233.at2someone.At2someone
-api-version: '1.18'
+api-version: '1.20'
 authors: [ qixuanjun233 ]
 description: 非常fashion的一个@人的tool
 website: www.qixuanjun233.top
