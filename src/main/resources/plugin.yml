@@ -1,5 +1,5 @@
 name: at2someone
-version: '1.0.4-SNAPSHOT'
+version: '1.0.5-SNAPSHOT'
 main: top.qixuanjun233.at2someone.At2someone
 api-version: '1.20'
 authors: [ qixuanjun233 ]

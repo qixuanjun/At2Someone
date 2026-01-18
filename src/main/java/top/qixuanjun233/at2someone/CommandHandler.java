@@ -159,7 +159,7 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
 
     private void HelpSomeone(CommandSender sender) {
         if (sender.hasPermission("at.admin")) {
-            sender.sendMessage("§7===== §aAt2Someone §cV1.0.4 §e命令帮助§a(管理员) §7=====");
+            sender.sendMessage("§7===== §aAt2Someone §cV1.0.5 §e命令帮助§a(管理员) §7=====");
             sender.sendMessage(ChatColor.WHITE + "/at dnd on " + ChatColor.GRAY + "- 开启勿扰模式");
             sender.sendMessage(ChatColor.WHITE + "/at dnd off " + ChatColor.GRAY + "- 关闭勿扰模式");
             sender.sendMessage(ChatColor.WHITE + "/at isprefix on/off" + ChatColor.GRAY + "- 启用/关闭需要输入@才可提及人（管理员）");
@@ -171,7 +171,7 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
             sender.sendMessage(ChatColor.YELLOW + "isprefix状态:" + plugin.isPrefixText());
             sender.sendMessage(ChatColor.YELLOW + "atall状态:" + plugin.isAtAllText());
         }else{
-            sender.sendMessage("§7===== §aAt2Someone §cV1.0.4 §e命令帮助 §7=====");
+            sender.sendMessage("§7===== §aAt2Someone §cV1.0.5 §e命令帮助 §7=====");
             sender.sendMessage(ChatColor.WHITE + "/at dnd on " + ChatColor.GRAY + "- 开启勿扰模式");
             sender.sendMessage(ChatColor.WHITE + "/at dnd off " + ChatColor.GRAY + "- 关闭勿扰模式");
             sender.sendMessage(ChatColor.GRAY + "==================================");

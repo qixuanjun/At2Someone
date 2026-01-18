@@ -47,7 +47,7 @@ public final class At2someone extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
-        getLogger().info("At2someone(Ver.1.0.4-SNAPSHOT) Enabled Successfully.");
+        getLogger().info("At2someone(Ver.1.0.5-SNAPSHOT) Enabled Successfully.");
         if(!pluginEnabled) {
             getLogger().warning("Plugin is Disabled,");
             getLogger().warning("If you want to trigger this plugin, enable it by using /at enable.");
