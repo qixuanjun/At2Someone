@@ -15,9 +15,10 @@ import java.util.stream.Collectors;
 
 public record PlayerChatListener(At2someone plugin) implements Listener {
 
-    // 统一匹配规则：可选的@前缀 + 用户名 + 单词边界(防止匹配qixuanjun233abcd中的前半部分)
-    private static final Pattern MENTION_PATTERN = Pattern.compile("(@?)([a-zA-Z0-9_]{3,16})\\b");
-    private static final Pattern AA_PATTERN = Pattern.compile("@(all|全体成员)\\b");
+    // 移除了静态正则，改用动态构建
+    // private static final Pattern MENTION_PATTERN = ...
+    // private static final Pattern AA_PATTERN = ...
+    // 为了支持中文匹配，移除了\b边界检查，改为更智能的动态匹配
 
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent event) {
@@ -28,49 +29,100 @@ public record PlayerChatListener(At2someone plugin) implements Listener {
             return;
         }
 
+        // 构建动态正则：匹配真实在线玩家ID，按长度倒序排列以优先匹配长名字
+        List<String> playerNames = Bukkit.getOnlinePlayers().stream()
+                .map(Player::getName)
+                .sorted((a, b) -> b.length() - a.length())
+                .toList();
+
         String message = event.getMessage();
         StringBuffer sb = new StringBuffer();
 
-        // 统一处理玩家提及
-        Matcher matcher = MENTION_PATTERN.matcher(message);
-        while (matcher.find()) {
-            String prefix = matcher.group(1); // "@" or ""
-            String playerName = matcher.group(2);
-            boolean hasAt = "@".equals(prefix);
+        if (!playerNames.isEmpty()) {
+            // 构建正则: (@?)(\b)(Name1|Name2|...)(?!\w)
+            // 解释:
+            // (@?): 捕获可选的@前缀 (Group 1)
+            // (\b)?: 为防止匹配到单词中间（如banana中的nana），需要在名字前加边界或@。
+            //        但是\b对于@并不友好(@是\W)。
+            //        所以逻辑是: 要么前面是@，要么前面是边界。
+            //        简化逻辑: 只要匹配到了名字，我们再手动检查前面是否是单词字符。
+            // (Name1|...): 捕获名字 (Group 2)
+            // 我们不加后缀边界，以便匹配 "Player你好" 这种情况
+            
+            String namePatternStr = playerNames.stream()
+                    .map(Pattern::quote)
+                    .collect(Collectors.joining("|"));
+            
+            // Regex: (@?)(Name1|Name2|...)
+            // 使用 Case_INSENSITIVE 让匹配更灵活，但替换时需注意
+            Pattern dynamicPattern = Pattern.compile("(@?)(" + namePatternStr + ")", Pattern.CASE_INSENSITIVE);
+            Matcher matcher = dynamicPattern.matcher(message);
 
-            // 如果配置强制要求前缀(isPrefix=true)，但这只是一个不带@的普通文本匹配 -> 跳过，当做普通文本处理
-            if (plugin.isPrefix() && !hasAt) {
-                matcher.appendReplacement(sb, Matcher.quoteReplacement(matcher.group(0)));
-                continue;
-            }
+            while (matcher.find()) {
+                String prefix = matcher.group(1); // "@" or ""
+                String matchedName = matcher.group(2); // 匹配到的名字文本(可能是小写)
 
-            Player mentionedPlayer = Bukkit.getPlayerExact(playerName);
-            if (mentionedPlayer != null && mentionedPlayer.isOnline()) {
-                // 是在线玩家 -> 高亮黄色
-                // 如果有@，replacement就是 §e@name§r (黄色)，没有就是 §7name§r (浅灰色)
-                String color = hasAt ? "§e" : "§7";
-                matcher.appendReplacement(sb, Matcher.quoteReplacement(color + prefix + playerName + "§r"));
+                // 手动检查单词左边界：
+                // 如果没有@前缀，且名字前面一个字符是字母或数字或下划线，则视为单词内部匹配(如banana匹配nana)，应跳过。
+                if (prefix.isEmpty() && matcher.start() > 0) {
+                     char prevChar = message.charAt(matcher.start() - 1);
+                     if ((prevChar >= 'a' && prevChar <= 'z') || 
+                         (prevChar >= 'A' && prevChar <= 'Z') || 
+                         (prevChar >= '0' && prevChar <= '9') || 
+                         prevChar == '_') {
+                         matcher.appendReplacement(sb, Matcher.quoteReplacement(matcher.group(0)));
+                         continue;
+                     }
+                }
+
+                // 获取真实玩家对象(因为忽略大小写匹配，需要用matchedName查找)
+                Player mentionedPlayer = Bukkit.getPlayerExact(matchedName);
+                // 如果精确匹配失败(因为大小写)，尝试模糊匹配或遍历查找
+                if (mentionedPlayer == null) {
+                    mentionedPlayer = Bukkit.getPlayer(matchedName);
+                }
                 
-                // 决定通知模式：有@ -> mode 0 (通知), 无@ -> mode 1 (不通知)
-                int mode = hasAt ? 0 : 1;
-                Player finalMentionedPlayer = mentionedPlayer;
-                Bukkit.getScheduler().runTask(plugin, () -> plugin.remindPlayer(event.getPlayer().getName(), event.getPlayer().getDisplayName(), finalMentionedPlayer, mode));
-            } else {
-                // 不是在线玩家
-                if (hasAt) {
-                    // 如果带了@，但是玩家不存在/不在线 -> 显示灰色表示无效提及
-                    matcher.appendReplacement(sb, Matcher.quoteReplacement("§8" + prefix + playerName + "§r"));
+                // 双重确认: 只有当找到的玩家名字确实等于(忽略大小写)匹配到的名字时才算数
+                // Bukkit.getPlayer是模糊匹配(prefix match)，如输入"A"可能匹配"Admin"。
+                // 但我们的正则已经是完整名字列表了，所以理论上这里肯定是全名匹配。
+                // 不过为了保险，检查名字一致性
+                if (mentionedPlayer != null && !mentionedPlayer.getName().equalsIgnoreCase(matchedName)) {
+                     mentionedPlayer = null; // 排除错误的前缀匹配
+                }
+
+                boolean hasAt = "@".equals(prefix);
+
+                // 如果配置强制要求前缀(isPrefix=true)，但这只是一个不带@的普通文本匹配 -> 跳过
+                if (plugin.isPrefix() && !hasAt) {
+                    matcher.appendReplacement(sb, Matcher.quoteReplacement(matcher.group(0)));
+                    continue;
+                }
+
+                if (mentionedPlayer != null && mentionedPlayer.isOnline()) {
+                    String color = hasAt ? "§e" : "§7";
+                    // 使用真实玩家名字(mentionedPlayer.getName())替换匹配到的文本(matchedName)，修正大小写
+                    matcher.appendReplacement(sb, Matcher.quoteReplacement(color + prefix + mentionedPlayer.getName() + "§r"));
+                    
+                    int mode = hasAt ? 0 : 1;
+                    Player finalMentionedPlayer = mentionedPlayer;
+                    Bukkit.getScheduler().runTask(plugin, () -> plugin.remindPlayer(event.getPlayer().getName(), event.getPlayer().getDisplayName(), finalMentionedPlayer, mode));
                 } else {
-                    // 只是普通文本匹配也不是玩家 -> 原样输出，不做任何染色
+                     // 理论上不可能进入这里，因为正则是从在线玩家列表构建的。
+                     // 除非玩家在这一瞬间下线了。
                     matcher.appendReplacement(sb, Matcher.quoteReplacement(matcher.group(0)));
                 }
             }
+            matcher.appendTail(sb);
+            message = sb.toString();
         }
-        matcher.appendTail(sb);
-        message = sb.toString();
 
         if (plugin.isAtAll()) {
-            Matcher matchAll = AA_PATTERN.matcher(message);
+            // 处理 @all / @全体成员
+            // 同样需要手动处理边界，防止 "small" 匹配 "all"
+            // Regex: (@)(all|全体成员)
+            // 这里我们强制要求有@前缀才算@all
+            Pattern aaPattern = Pattern.compile("(@)(all|全体成员)", Pattern.CASE_INSENSITIVE);
+            Matcher matchAll = aaPattern.matcher(message);
             sb = new StringBuffer();
             while (matchAll.find()) {
                 if (event.getPlayer().hasPermission("at.atall")) {
